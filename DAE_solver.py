@@ -25,7 +25,7 @@ def solver(f,df,q,dq, init_x, u, funargs, NRparms, method = 'Trap', tstart = 0, 
             return retval
 
         def dgfun(x,x_old):
-            retval = dq(x, u,funargs) - h*(.5)*(df(x,u,funargs))
+            retval = dq(x, u,funargs) - h*(df(x,u,funargs))
             return retval
     elif method == 'FE':
         def gfun(x, x_old):
