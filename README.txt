@@ -1,0 +1,1 @@
+Final project simulating multilayer network with winnter-take-all/Hebbian dynamics.
