@@ -49,8 +49,14 @@ class fullV1:
         out.append('Self-activation parameter is %s' % lam)
         return out
 
-    def print_parms(self):
+
+    def print_allparms(self):
         return(self._parms)
+    
+    def print_parms(self):
+        N,n1,d1,d2,S1,lam, a, b, tau = self._parms.values()
+        L1_dim = int((N+S1-n1)/S1) #one-sided: number of units
+        return N, L1_dim, d1,d2
     
     def pixel_mask(self, u):
         N,n1,d1,d2,S1,lam, a, b, tau = self._parms.values()
@@ -183,17 +189,17 @@ class fullV1:
             Q[i*d1:(i+1)*d1, i*d1:(i+1)*d1] = Q1
         
 #         yval = smrelu(.1*u - Q @ y) - y
-        yval = (logG(u) - Q @ y).clamp(min=0).sub(y)
+        yval = -((logG(u) - Q @ y).clamp(min=0).sub(y))
 #         yval = (sigmoid(logG(u) - Q @ y)).sub(y)
 #         yval = (u - Q @ torch.abs(y)).clamp(min=0) - y
-        vval = v - (1/3)*(v**3) - w + logG(y)
-#         vval = v - (1/3)*(v**3) - w + y
+#         vval = v - (1/3)*(v**3) - w + logG(y)
+        vval = v - (1/3)*(v**3) - w + y
         wval = itau*(v + a - b*w)
-        v_zval = v_z - (1/3)*(v_z**3) - w_z + A @ logG(v)
-#         v_zval = v_z - (1/3)*(v_z**3) - w_z + A @ v
+#         v_zval = v_z - (1/3)*(v_z**3) - w_z + A @ logG(v)
+        v_zval = v_z - (1/3)*(v_z**3) - w_z + A @ v.clamp(min=0)
         w_zval = itau*(v_z + a - b*w_z)
 #         z = (v_z - Q2 @ z).clamp(min=0).sub(z) 
-        z = (logG(v_z) - Q2 @ z).clamp(min=0).sub(z) 
+        z = -((logG(v_z.clamp(min=0)) - Q2 @ z).clamp(min=0).sub(z)) 
 #         z = (sigmoid(logG(v_z) - Q2 @ z)).sub(z) 
 
 #         z = (v_z - Q2 @ torch.sign(z)).clamp(min=0).sub(z) 
@@ -220,11 +226,11 @@ class fullV1:
         Q1 = (torch.ones(d1,d1) - (1+lam)*torch.eye(d1))
         for i in range(L1sq):
             Q[i*d1:(i+1)*d1, i*d1:(i+1)*d1] = Q1
-        J[:N1,:N1] = torch.diag(drelu(logG(u) - Q @ y)) @ (-Q) - torch.eye(N1)  
+        J[:N1,:N1] = -(torch.diag(drelu(logG(u) - Q @ y)) @ (-Q) - torch.eye(N1))  
 #         J[:N1,:N1] = torch.diag(dsmrelu(u - Q @ y)) @ Q @torch.diag(torch.sign(y)) - torch.eye(N1)    
         #dv/dy
-#         J[N1:2*N1,:N1] = torch.eye(N1)
-        J[N1:2*N1,:N1] = torch.diag(dlogG(y))
+        J[N1:2*N1,:N1] = torch.eye(N1)
+#         J[N1:2*N1,:N1] = torch.diag(dlogG(y))
         #dv/dv
         J[N1:2*N1,N1:2*N1] = torch.diag(1-v**2)
         #dv/dw
@@ -235,7 +241,7 @@ class fullV1:
         J[2*N1:3*N1,2*N1:3*N1] = -b*itau*torch.eye(N1)
         
         #dv_z/dv
-        J[3*N1:(3*N1 + N2),N1:2*N1] = A @ torch.diag(dlogG(v))
+        J[3*N1:(3*N1 + N2),N1:2*N1] = A @ torch.diag(drelu(v))
 #         J[3*N1:(3*N1 + N2),N1:2*N1] = A
 
         #dv_z/dv_z
@@ -250,10 +256,11 @@ class fullV1:
         
         Q2 = torch.ones(N2,N2) - (1+lam)*torch.eye(N2)
         #dz/d_v_z
-        J[(3*N1 + 2*N2):,3*N1:(3*N1 + N2)] = torch.diag(drelu(logG(v_z) - Q2 @ z)) @ torch.diag(dlogG(v_z))
+        J[(3*N1 + 2*N2):,3*N1:(3*N1 + N2)] = -(torch.diag(drelu(logG(v_z.clamp(min=0)) - Q2 @ z))\
+                                               @ torch.diag(dlogG(v_z.clamp(min = 0))*drelu(v_z)))
 #         J[(3*N1 + 2*N2):,3*N1:(3*N1 + N2)] = torch.diag(.5*(torch.sign(v_z - Q2 @ z)+1))
         #dz/dz
-        J[(3*N1 + 2*N2):, (3*N1 + 2*N2):] = (torch.diag(drelu(v_z - Q2 @ z)) @ (-Q2)) - torch.eye(N2)
+        J[(3*N1 + 2*N2):, (3*N1 + 2*N2):] = -((torch.diag(drelu(logG(v_z.clamp(min=0)) - Q2 @ z)) @ (-Q2)) - torch.eye(N2))
         
         return J
     
