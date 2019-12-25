@@ -28,7 +28,7 @@ class FN:
         retval[:n] = v - (1/3)*(v**3) - w + u
         retval[n:] = v + a -b*w
         
-        return retval
+        return -retval
     
     def q(self,x,u, funargs = []):
         n, a,b,tau = self._parms.values()
@@ -39,7 +39,7 @@ class FN:
         retval[:n] = -v
         retval[n:] = -tau*w
         
-        return retval
+        return -retval
     
     def df_dx(self,x,u, funargs = []):
         n, a,b,tau = self._parms.values()
@@ -52,7 +52,7 @@ class FN:
         J[n:,:n] = torch.eye(n)
         J[n:,n:] = -b*torch.eye(n)
         
-        return J
+        return -J
     
     def dq_dx(self,x,u, funargs = []):
         n, a,b,tau = self._parms.values()
@@ -63,7 +63,7 @@ class FN:
         J[:n,:n] = -torch.eye(n)
         J[n:,n:] = -tau*torch.eye(n)
         
-        return J
+        return -J
     
 
         
