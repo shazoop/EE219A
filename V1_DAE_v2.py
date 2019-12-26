@@ -198,7 +198,7 @@ class fullV1:
         w_zval = itau*(v_z + a - b*w_z)
 #         z = (v_z - Q2 @ z).clamp(min=0).sub(z) 
 #         z = -((logG(v) - Q2 @ z).clamp(min=0).sub(z))
-        z = -(( A @ v.clamp(min=0) - Q2 @ z).clamp(min=0).sub(z))
+        z = -((v.clamp(min=0) - Q2 @ z).clamp(min=0).sub(z))
 #         z = (sigmoid(logG(v_z) - Q2 @ z)).sub(z) 
 #         z = (v_z - Q2 @ torch.sign(z)).clamp(min=0).sub(z) 
 
@@ -262,8 +262,8 @@ class fullV1:
         
         #dv_z/dz
 #         J[3*N1:(3*N1 + N2),N1:2*N1] = A @ torch.diag(dlogG(z))
-#         J[3*N1:(3*N1 + N2),(3*N1+2*N2):] = A
-        J[3*N1:(3*N1 + N2),(3*N1+2*N2):] = torch.eye(N2)
+        J[3*N1:(3*N1 + N2),(3*N1+2*N2):] = A
+
         #dv_z/dv_z
         J[3*N1:(3*N1 + N2),3*N1:(3*N1 + N2)] = torch.diag(1-v_z**2)
         #dv_z/dw_z
@@ -277,12 +277,12 @@ class fullV1:
         Q2 = torch.ones(N1,N1) - (1+lam)*torch.eye(N1)
         #dz/dv
 #         J[(3*N1 + 2*N2):,N1:2*N1] = -torch.diag(drelu(logG(v) - Q2 @ z)) @ torch.diag(dlogG(v))
-        J[(3*N1 + 2*N2):,N1:2*N1] = -torch.diag(drelu((v.clamp(min=0)) - Q2 @ z)) @ (A  @ torch.diag(drelu(v)))
+        J[(3*N1 + 2*N2):,N1:2*N1] = -torch.diag(drelu((v.clamp(min=0)) - Q2 @ z)) @ torch.diag(drelu(v))
 #         J[(3*N1 + 2*N2):,3*N1:(3*N1 + N2)] = torch.diag(.5*(torch.sign(v_z - Q2 @ z)+1))
         #dz/dz
 #         J[(3*N1 + 2*N2):, (3*N1 + 2*N2):] = -((torch.diag(drelu(logG(v) - Q2 @ z)) @ (-Q2)) - torch.eye(N1))
-#         J[(3*N1 + 2*N2):, (3*N1 + 2*N2):] = -((torch.diag(drelu((v.clamp(min=0)) - Q2 @ z)) @ (-Q2)) - torch.eye(N1))
-        J[(3*N1 + 2*N2):, (3*N1 + 2*N2):] = -((torch.diag(drelu(A@v.clamp(min=0) - Q2 @ z)) @ (-Q2)) - torch.eye(N1))
+        J[(3*N1 + 2*N2):, (3*N1 + 2*N2):] = -((torch.diag(drelu((v.clamp(min=0)) - Q2 @ z)) @ (-Q2)) - torch.eye(N1)
+        
     
 #         J = torch.zeros(ttlN,ttlN)   
 #         #Q. dy/dy
