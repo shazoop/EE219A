@@ -127,7 +127,8 @@ class FE_V1:
         z_in = self.layer_mask(z, L3_dim, n3, S3)
         u_in = self.pixel_mask(u)
         
-        y_new = (torch.einsum('abcn,abn -> abc',W_y,u_in).sub(torch.einsum('abcd,abd -> abc',y_inhib, y))).clamp(min= 0).sub(y)       
+        y_new = ((sigmoid(torch.einsum('abcn,abn -> abc',W_y,u_in)).sub(torch.einsum('abcd,abd -> abc',y_inhib,y))).clamp(min = 0).sub(y))
+#         y_new = sigmoid(torch.einsum('abcn,abn -> abc',W_y,u_in).sub(torch.einsum('abcd,abd -> abc',y_inhib, y))).clamp(min= 0).sub(y)     
 #         y_new = sigmoid(torch.einsum('abcn,abn -> abc',W_y,u_in).sub(torch.einsum('ab, abcd,abd -> abc', torch.norm(u_in,p = 1, dim=-1)**2,y_inhib, y))).clamp(min=0).sub(y)
 #         y_new = sigmoid(torch.einsum('abcn,abn -> abc',W_y,u_in).add(torch.einsum('abcd,abd -> abc', Q, y)).sub(t)).sub(y)
         #y_new = 2*(smrelu(sigmoid(torch.einsum('abcn,abn -> abc',W_y,u_in)).sub(torch.einsum('abcd,abd -> abc',y_inhib,y))).sub(y))
