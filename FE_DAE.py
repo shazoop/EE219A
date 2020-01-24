@@ -13,10 +13,10 @@ def relu(x):
 class FE_V1:
     def __init__(self, pixDim = 28, n1 = 12, d1 = 16, n2 = 3, d2 = 16, n3 = 2, d3 = 32, alpha = 1e-2, beta = 1e-6, gamma = 1e-6,\
                  eta = 2e-6, theta = 3e-6, lam = 1, p = 1/8, S1 = 4, S2 = 1, S3 = 1, h = .05):
-        self._parms = {'pixel dim' : pixDim, 'RF 1 dim': n1, 'layer1 depth': d1,\
-                       'RF 2 dim': n2, 'layer 2 depth': d2, 'RF 3 dim': n3,'layer 3 depth': d3,\
-                      'L1Hebb': beta, 'L1AntiH': alpha, 'L1thresh': gamma, 'L2Hebb': eta, 'L3Hebb': theta,\
-                       'L1prob': p, 'L1 stride': S1, 'L2 stride': S2, 'L3 stride': S3, 'time step': h} 
+        self._parms = {'pixel dim/pixDim' : pixDim, 'RF 1 dim/n1': n1, 'layer1 depth/d1': d1,\
+                       'RF 2 dim/n2': n2, 'layer 2 depth/d2': d2, 'RF 3 dim/n3': n3,'layer 3 depth/d3': d3,\
+                      'L1Hebb/beta': beta, 'L1AntiH/alpha': alpha, 'L1thresh/gamma': gamma, 'L2Hebb/eta': eta, 'L3Hebb/theta': theta,\
+                       'L1prob/p': p, 'L1 stride/S1': S1, 'L2 stride/S2': S2, 'L3 stride/S3': S3, 'time step/h': h} 
         
     def summary(self):
         '''All dimensions are one-sided. ex. if N = 4, then input image is N x N array
